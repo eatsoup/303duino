@@ -11,6 +11,20 @@
 #include "envelope.h"
 #include "distorsion.h"
 
+#define I_ATT A0
+#define I_DEC A1
+#define I_SUST A2
+#define I_REL A3
+#define I_CUTOFF A4
+#define I_RESO A5
+#define I_AMT A6
+#define I_TUN A7
+#define I_MIDI 1
+#define I_PUSH 2
+#define LED1 3
+#define LED2 4
+#define I_SWITCH 11
+
 float midiToPercent(int midi) {
   return (float)midi / 127.0f;
 }
@@ -78,14 +92,14 @@ void setup(){
   MIDI.setHandleNoteOff(HandleNoteOff);
   MIDI.begin(MIDI_CHANNEL_OMNI);
 
-  pinMode(2, INPUT);
-  pinMode(3, OUTPUT);
-  pinMode(4, OUTPUT);
-  pinMode(11, INPUT);
+  pinMode(I_PUSH, INPUT);
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+  pinMode(I_SWITCH, INPUT);
 
   wave_shape = 0;
   legato_mode = 0;
-  if(digitalRead(11) == HIGH) {
+  if(digitalRead(I_SWITCH) == HIGH) {
     displayLegatoMode();
   } else {
     displayWaveShape();
@@ -108,18 +122,18 @@ void updateControl(){
   float reso = 1.0;
   float amt = 1.0;*/
 
-  float att = analogToPercent(mozziAnalogRead(A0));
-  float dec = analogToPercent(mozziAnalogRead(A1));
-  float sust = analogToPercent(mozziAnalogRead(A2));
-  float rel = analogToPercent(mozziAnalogRead(A3));
+  float att = analogToPercent(mozziAnalogRead(I_ATT));
+  float dec = analogToPercent(mozziAnalogRead(I_DEC));
+  float sust = analogToPercent(mozziAnalogRead(I_SUST));
+  float rel = analogToPercent(mozziAnalogRead(I_REL));
   float drive = 0.0;
-  float cutoff = analogToPercent(mozziAnalogRead(A4));
-  float reso = analogToPercent(mozziAnalogRead(A5));
-  float amt = analogToPercent(mozziAnalogRead(A6));
+  float cutoff = analogToPercent(mozziAnalogRead(I_CUTOFF));
+  float reso = analogToPercent(mozziAnalogRead(I_RESO));
+  float amt = analogToPercent(mozziAnalogRead(I_AMT));
 
-  int fine_tuning = mozziAnalogRead(A7);
+  int fine_tuning = mozziAnalogRead(I_TUN);
 
-  if(digitalRead(11) == HIGH) {
+  if(digitalRead(I_SWITCH) == HIGH) {
     if(!switch_param) {
       displayLegatoMode();
       switch_param = true;
@@ -149,7 +163,7 @@ void updateControl(){
 }
 
 void updateWaveShape() {
-  if(digitalRead(2) == HIGH) {
+  if(digitalRead(I_PUSH) == HIGH) {
     if(!set_button) {
       set_button = true;
       
@@ -166,13 +180,13 @@ void updateWaveShape() {
 }
 
 void displayWaveShape() {
-  digitalWrite(3, LOW);
-  digitalWrite(4, LOW);
-  digitalWrite(3 + wave_shape, HIGH);
+  digitalWrite(LED1, LOW);
+  digitalWrite(LED2, LOW);
+  digitalWrite(LED1 + wave_shape, HIGH);
 }
 
 void updateLegatoMode() {
-  if(digitalRead(2) == HIGH) {
+  if(digitalRead(I_PUSH) == HIGH) {
     if(!set_button) {
       set_button = true;
       
@@ -189,12 +203,12 @@ void updateLegatoMode() {
 }
 
 void displayLegatoMode() {
-  digitalWrite(3, LOW);
-  digitalWrite(4, LOW);
+  digitalWrite(LED1, LOW);
+  digitalWrite(LED2, LOW);
   switch(legato_mode) {
-    case 1: digitalWrite(3, HIGH); break;
-    case 2: digitalWrite(4, HIGH); break;
-    case 3: digitalWrite(3, HIGH); digitalWrite(4, HIGH); break;
+    case 1: digitalWrite(LED1, HIGH); break;
+    case 2: digitalWrite(LED2, HIGH); break;
+    case 3: digitalWrite(LED1, HIGH); digitalWrite(LED2, HIGH); break;
   }
 }
 
